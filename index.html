@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health Results</title>
+  <style>
+    /* ---- Reset & base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1624;
+      --card-bg: #1a2337;
+      --accent: #4f8ef7;
+      --accent2: #56e3a0;
+      --text: #e8ecf4;
+      --text-muted: #8a96b0;
+      --red: #f76b6b;
+      --yellow: #f7c948;
+      --green: #56e3a0;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ---- Page header ---- */
+    .page-header {
+      width: 100%;
+      text-align: center;
+      padding: 28px 16px 8px;
+    }
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--text);
+    }
+    .page-header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ---- Main content ---- */
+    .content {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* ---- Health Score ring ---- */
+    .score-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px 20px 22px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    }
+    .score-card .card-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .ring-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+    }
+    .ring-wrap svg {
+      transform: rotate(-90deg);
+      width: 140px;
+      height: 140px;
+    }
+    .ring-bg { fill: none; stroke: #2a3450; stroke-width: 10; }
+    .ring-fg {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s ease;
+    }
+    .ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .ring-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .ring-unit {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .score-status {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* ---- Metric cards grid ---- */
+    .metrics-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .metric-card.heart::before { background: var(--red); }
+    .metric-card.bp::before    { background: var(--accent); }
+
+    .metric-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .metric-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .metric-unit {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* Blood pressure special layout */
+    .bp-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .bp-separator {
+      font-size: 1.4rem;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+    .bp-inner {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+    }
+    .bp-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bp-block .metric-value { font-size: 1.8rem; }
+    .bp-block .metric-label { letter-spacing: 0.06em; }
+
+    /* ---- Timestamp ---- */
+    .timestamp {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ---- Error / loading ---- */
+    .status-box {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      width: 100%;
+      display: none;
+    }
+    .status-box.visible { display: block; }
+    .status-box.error { border: 1px solid var(--red); }
+    .status-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .status-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+    .status-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ---- Exit button ---- */
+    .exit-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px 32px;
+    }
+    .exit-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1.5px solid #2a3450;
+      border-radius: 50px;
+      padding: 12px 52px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .exit-btn:hover, .exit-btn:focus {
+      border-color: var(--accent);
+      color: var(--text);
+      background: rgba(79,142,247,0.08);
+      outline: none;
+    }
+
+    /* ---- Toast message ---- */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a3450;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 0.82rem;
+      max-width: 90vw;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .toast.error { border: 1px solid var(--red); color: var(--red); }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Health Results</h1>
+    <p class="subtitle" id="timestamp"></p>
+  </div>
+
+  <div class="content" id="results-section" style="display:none">
+    <!-- Health Score Ring -->
+    <div class="score-card">
+      <span class="card-label">Overall Health Score</span>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 140 140">
+          <circle class="ring-bg" cx="70" cy="70" r="60"/>
+          <circle class="ring-fg" id="ring-fg" cx="70" cy="70" r="60"
+                  stroke-dasharray="377" stroke-dashoffset="377"/>
+        </svg>
+        <div class="ring-center">
+          <span class="ring-value" id="score-value">--</span>
+          <span class="ring-unit">/ 100</span>
+        </div>
+      </div>
+      <span class="score-status" id="score-status"></span>
+    </div>
+
+    <!-- Metrics grid -->
+    <div class="metrics-grid">
+      <!-- Heart Rate -->
+      <div class="metric-card heart">
+        <span class="metric-icon">❤️</span>
+        <span class="metric-label">Heart Rate</span>
+        <span class="metric-value" id="hr-value">--</span>
+        <span class="metric-unit">bpm</span>
+      </div>
+
+      <!-- Blood Pressure (full width) -->
+      <div class="metric-card bp">
+        <span class="metric-icon">🩺</span>
+        <span class="metric-label" style="margin-bottom:6px">Blood Pressure</span>
+        <div class="bp-inner">
+          <div class="bp-block">
+            <span class="metric-value" id="sys-value">--</span>
+            <span class="metric-label">Systolic</span>
+            <span class="metric-unit">mmHg</span>
+          </div>
+          <span class="bp-separator">/</span>
+          <div class="bp-block">
+            <span class="metric-value" id="dia-value">--</span>
+            <span class="metric-label">Diastolic</span>
+            <span class="metric-unit">mmHg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div class="content">
+    <div class="status-box error" id="error-box">
+      <div class="status-icon">⚠️</div>
+      <div class="status-title">Unable to Load Results</div>
+      <div class="status-desc" id="error-desc">No result data found in the URL.</div>
+    </div>
+  </div>
+
+  <!-- Exit button (always at bottom center) -->
+  <div class="exit-wrap">
+    <button class="exit-btn" onclick="navigateBack()">Exit</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ============================================================
+     *  Float-16 decoder  (IEEE 754 half-precision → JS number)
+     * ============================================================ */
+    function float16ToNumber(bits) {
+      const sign = (bits & 0x8000) ? -1 : 1;
+      const exp  = (bits & 0x7C00) >> 10;
+      const mant =  bits & 0x03FF;
+      if (exp === 0)  return mant === 0 ? sign * 0 : sign * Math.pow(2, -14) * (mant / 1024);
+      if (exp === 31) return mant === 0 ? sign * Infinity : NaN;
+      return sign * Math.pow(2, exp - 15) * (1 + mant / 1024);
+    }
+
+    /* ============================================================
+     *  CRC-16 (Modbus / IBM variant — same as reference project)
+     * ============================================================ */
+    function crc16(str) {
+      const buf = Array.from(str).map(c => c.charCodeAt(0));
+      let crc = 0xFFFF;
+      for (let i = 0; i < buf.length; i++) {
+        crc ^= buf[i];
+        for (let j = 0; j < 8; j++) {
+          const odd = crc & 0x0001;
+          crc >>= 1;
+          if (odd) crc ^= 0xA001;
+        }
+      }
+      const lsb = crc & 0x00FF;
+      const msb = (crc & 0xFF00) >> 8;
+      return new Uint8Array([lsb, msb]);   // little-endian
+    }
+
+    function pointIDToHashKey(id) {
+      const bytes = crc16(id);
+      return `${bytes[0]}${bytes[1]}`;
+    }
+
+    /* ============================================================
+     *  Decode NuraQR encoded string from URL
+     * ============================================================ */
+    function decodeNuraQRString(encoded) {
+      const raw   = atob(decodeURIComponent(encoded));
+      const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+
+      // Magic bytes: "NQ1"
+      if (bytes[0] !== 0x4e || bytes[1] !== 0x51 || bytes[2] !== 0x31) {
+        throw new Error('Invalid header – expected NQ1 magic bytes');
+      }
+
+      // Compact timestamp (Uint32 LE, bytes 3-6)
+      const tsView = new DataView(bytes.slice(3, 7).buffer);
+      const tsNum  = tsView.getUint32(0, true);
+      const timestamp = compactTsToDate(tsNum);
+
+      // Results payload (4 bytes per point: 2-byte CRC-16 key + 2-byte float16)
+      const payload = bytes.slice(7);
+      if (payload.length % 4 !== 0) throw new Error('Invalid payload length');
+
+      const results = { timestamp };
+      for (let i = 0; i < payload.length; i += 4) {
+        const key   = `${payload[i]}${payload[i+1]}`;
+        const dv    = new DataView(payload.slice(i+2, i+4).buffer);
+        const val   = float16ToNumber(dv.getUint16(0, true));
+        results[key] = parseFloat(val.toFixed(2));
+      }
+      return results;
+    }
+
+    function compactTsToDate(n) {
+      const s    = n.toString();
+      const year = parseInt('20' + s.slice(0, 2), 10);
+      const mon  = parseInt(s.slice(2, 4), 10) - 1;
+      const day  = parseInt(s.slice(4, 6), 10);
+      const hr   = parseInt(s.slice(6, 8), 10);
+      const min  = parseInt(s.slice(8, 10), 10);
+      return new Date(year, mon, day, hr, min);
+    }
+
+    /* ============================================================
+     *  Colour helpers
+     * ============================================================ */
+    function scoreColor(score) {
+      if (isNaN(score)) return 'var(--text-muted)';
+      if (score >= 80)  return 'var(--green)';
+      if (score >= 60)  return 'var(--yellow)';
+      return 'var(--red)';
+    }
+    function scoreLabel(score) {
+      if (isNaN(score)) return '';
+      if (score >= 80)  return '😊 Excellent';
+      if (score >= 60)  return '😐 Fair';
+      return '😟 Needs Attention';
+    }
+
+    /* ============================================================
+     *  Render
+     * ============================================================ */
+    function render(results) {
+      // Timestamp
+      if (results.timestamp) {
+        document.getElementById('timestamp').textContent =
+          results.timestamp.toLocaleString(undefined, { dateStyle:'medium', timeStyle:'short' });
+      }
+
+      // Health Score ring
+      const hsKey = pointIDToHashKey('HEALTH_SCORE');
+      const hs    = results[hsKey];
+      const scoreEl  = document.getElementById('score-value');
+      const ringEl   = document.getElementById('ring-fg');
+      const statusEl = document.getElementById('score-status');
+      const circumf  = 2 * Math.PI * 60; // r = 60
+
+      if (!isNaN(hs) && hs !== undefined) {
+        const pct    = Math.min(Math.max(hs / 100, 0), 1);
+        const offset = circumf * (1 - pct);
+        scoreEl.textContent = Math.round(hs);
+        ringEl.style.strokeDashoffset = offset;
+        const col = scoreColor(hs);
+        ringEl.style.stroke   = col;
+        scoreEl.style.color   = col;
+        statusEl.textContent  = scoreLabel(hs);
+        statusEl.style.color  = col;
+      } else {
+        scoreEl.textContent  = 'N/A';
+        statusEl.textContent = '';
+        ringEl.style.stroke  = 'var(--text-muted)';
+      }
+
+      // Heart Rate
+      const hrKey = pointIDToHashKey('HR_BPM');
+      const hr    = results[hrKey];
+      document.getElementById('hr-value').textContent = isNaN(hr) ? 'N/A' : Math.round(hr);
+
+      // Blood Pressure
+      const sysKey = pointIDToHashKey('BP_SYSTOLIC');
+      const diaKey = pointIDToHashKey('BP_DIASTOLIC');
+      const sys    = results[sysKey];
+      const dia    = results[diaKey];
+      document.getElementById('sys-value').textContent = isNaN(sys) ? 'N/A' : Math.round(sys);
+      document.getElementById('dia-value').textContent = isNaN(dia) ? 'N/A' : Math.round(dia);
+
+      document.getElementById('results-section').style.display = 'flex';
+    }
+
+    /* ============================================================
+     *  Toast helper
+     * ============================================================ */
+    function showMessage(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type === 'error' ? 'error' : ''} show`;
+      setTimeout(() => { t.className = 'toast'; }, 4000);
+    }
+
+    /* ============================================================
+     *  AndroidBridge back navigation
+     * ============================================================ */
+    function navigateBack() {
+      const bridge = window.AndroidBridge;
+      if (bridge && typeof bridge.onJSNavigateBack === 'function') {
+        bridge.onJSNavigateBack();
+        return;
+      }
+      showMessage('AndroidBridge.onJSNavigateBack is not available in this browser environment.', 'error');
+    }
+
+    /* ============================================================
+     *  Bootstrap
+     * ============================================================ */
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const r      = params.get('r');
+
+      if (!r) {
+        document.getElementById('error-box').classList.add('visible');
+        return;
+      }
+
+      try {
+        const results = decodeNuraQRString(r);
+        render(results);
+      } catch (err) {
+        document.getElementById('error-box').classList.add('visible');
+        document.getElementById('error-desc').textContent = err.message || 'Failed to decode result data.';
+        console.error('Decode error:', err);
+      }
+    });
+  </script>
+</body>
+</html>
