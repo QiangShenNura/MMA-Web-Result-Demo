@@ -481,6 +481,13 @@
       document.getElementById('dia-value').textContent = isNaN(dia) ? 'N/A' : Math.round(dia);
 
       document.getElementById('results-section').style.display = 'flex';
+
+      // Log profile input for debugging
+      const pointsIDs = ['INPUT_AGE', 'INPUT_HEIGHT', 'INPUT_WEIGHT', 'INPUT_GENDER', 'INPUT_DIABETES', 'INPUT_SMOKING', 'INPUT_BP_MEDICATION'];
+      pointsIDs.forEach(id => {
+        const key = pointIDToHashKey(id);
+        console.log(`${id}:`, results[key]);
+      });
     }
 
     /* ============================================================
