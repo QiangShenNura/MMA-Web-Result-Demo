@@ -436,7 +436,7 @@
     /* ============================================================
      *  Render
      * ============================================================ */
-    function render(results) {
+    function render(results, measurementID, partnerID) {
       // Timestamp
       if (results.timestamp) {
         document.getElementById('timestamp').textContent =
@@ -488,6 +488,8 @@
         const key = pointIDToHashKey(id);
         console.log(`${id}:`, results[key]);
       });
+      console.log('Measurement ID:', measurementID);
+      console.log('Partner ID:', partnerID);
     }
 
     /* ============================================================
@@ -518,6 +520,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const r      = params.get('r');
+      const measurementID = params.get('mid');
+      const partnerID = params.get('pid');
+
 
       if (!r) {
         document.getElementById('error-box').classList.add('visible');
@@ -526,7 +531,7 @@
 
       try {
         const results = decodeNuraQRString(r);
-        render(results);
+        render(results, measurementID, partnerID);
       } catch (err) {
         document.getElementById('error-box').classList.add('visible');
         document.getElementById('error-desc').textContent = err.message || 'Failed to decode result data.';
