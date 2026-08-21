@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Health Assessment</title>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <nav class="screen-actions" aria-label="Report actions">
+        <button id="closeButton" class="secondary" type="button">Back</button>
+        <button id="printButton" class="primary" type="button">Print report</button>
+    </nav>
+
+    <main id="report" class="report-sheet" aria-busy="true">
+        <header class="report-header">
+            <div class="report-heading">
+                <h1 id="reportTitle">Health Assessment</h1>
+                <time id="timestamp"></time>
+            </div>
+        </header>
+
+        <section id="measurementMeta" class="measurement-meta" hidden>
+            <span id="measurementId"></span>
+            <span id="quality"></span>
+        </section>
+
+        <div id="loading" class="message">Preparing measurement report…</div>
+        <div id="error" class="message error" role="alert" hidden></div>
+        <div id="sections"></div>
+
+        <footer id="disclaimer" class="disclaimer" hidden>
+            <span class="warning" aria-hidden="true">!</span>
+            <p id="disclaimerText"></p>
+        </footer>
+    </main>
+
+    <script src="report.js"></script>
+</body>
+</html>

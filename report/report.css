@@ -1,0 +1,268 @@
+:root {
+    --report-blue: #0076a8;
+    --report-cyan: #00aeef;
+    --ink: #17212b;
+    --muted: #5f6b76;
+    --line: #d7e0e6;
+    --paper: #ffffff;
+    --canvas: #e9eef2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--canvas);
+}
+
+body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--canvas);
+    font-family: Arial, "Noto Sans", "Microsoft YaHei", sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.screen-actions {
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px max(16px, calc((100vw - 8.5in) / 2));
+    background: rgba(233, 238, 242, 0.96);
+    border-bottom: 1px solid #ced8de;
+}
+
+.android-webview .screen-actions {
+    display: none;
+}
+
+button {
+    min-height: 42px;
+    padding: 0 20px;
+    border: 1px solid var(--report-blue);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button.primary {
+    color: white;
+    background: var(--report-blue);
+}
+
+button.secondary {
+    color: var(--report-blue);
+    background: white;
+}
+
+.report-sheet {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 24px auto;
+    padding: 0.34in 0.42in;
+    background: var(--paper);
+    box-shadow: 0 12px 36px rgba(23, 33, 43, 0.16);
+}
+
+.report-header {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    min-height: 0.62in;
+    border-bottom: 2px solid var(--report-blue);
+}
+
+.report-heading {
+    padding-bottom: 8px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    color: var(--report-blue);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+time {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.measurement-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0 4px;
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.message {
+    padding: 56px 12px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.message.error {
+    color: #a12622;
+}
+
+.report-section {
+    margin-top: 8px;
+    break-inside: avoid;
+}
+
+.report-section h2 {
+    margin: 0 0 3px;
+    color: var(--report-blue);
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 10px;
+}
+
+.results-table thead {
+    display: table-header-group;
+}
+
+.results-table th {
+    padding: 4px 10px;
+    color: #fff;
+    background: var(--report-cyan);
+    font-size: 10px;
+    text-align: left;
+}
+
+.results-table th:nth-child(1),
+.results-table td:nth-child(1) {
+    width: 48%;
+}
+
+.results-table th:nth-child(2),
+.results-table td:nth-child(2) {
+    width: 26%;
+}
+
+.results-table th:nth-child(3),
+.results-table td:nth-child(3) {
+    width: 26%;
+}
+
+.results-table td {
+    padding: 3px 10px;
+    border-bottom: 1px solid var(--line);
+    line-height: 1.25;
+    vertical-align: top;
+}
+
+.results-table tr {
+    break-inside: avoid;
+}
+
+.result-value {
+    font-weight: 700;
+}
+
+.status-green {
+    color: #137333;
+}
+
+.status-lightGreen {
+    color: #4f7f21;
+}
+
+.status-yellow {
+    color: #8a6500;
+}
+
+.status-lightRed {
+    color: #b45100;
+}
+
+.status-red {
+    color: #b3261e;
+}
+
+.disclaimer {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 7px;
+    align-items: start;
+    margin-top: 10px;
+    padding-top: 8px;
+    color: #4f5962;
+    border-top: 1px solid var(--line);
+    font-size: 8.5px;
+    line-height: 1.35;
+    break-inside: avoid;
+}
+
+.warning {
+    display: inline-grid;
+    width: 16px;
+    height: 16px;
+    place-items: center;
+    color: #fff;
+    background: #f0a000;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.disclaimer p {
+    margin: 0;
+}
+
+@media (max-width: 850px) {
+    .report-sheet {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        padding: 72px 22px 28px;
+        box-shadow: none;
+    }
+
+    .screen-actions {
+        position: fixed;
+        right: 0;
+        left: 0;
+    }
+}
+
+@page {
+    size: Letter portrait;
+    margin: 0.34in 0.42in;
+}
+
+@media print {
+    html,
+    body {
+        background: #fff;
+    }
+
+    .screen-actions {
+        display: none !important;
+    }
+
+    .report-sheet {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+}
